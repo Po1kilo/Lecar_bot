@@ -1,8 +1,7 @@
 from telebot import TeleBot
-from dotenv import load_dotenv
 import os
-load_dotenv("bot_token.env")
-TOKEN = os.getenv("TOKEN")
+
+TOKEN = os.getenv("TOKEN")  # Берём TOKEN из настроек Render
 
 bot = TeleBot(TOKEN)
 @bot.message_handler(commands=['start'])
@@ -13,4 +12,5 @@ def start(message):
 def get_text_messages(message):
      bot.send_message(message.from_user.id, message.text)
 
-bot.infinity_polling()
+if __name__ == "__main__":
+    bot.infinity_polling()
