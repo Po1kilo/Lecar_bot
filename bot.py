@@ -1,16 +1,54 @@
-from telebot import TeleBot
 import os
+from flask import Flask, abort, request
+from telebot import TeleBot, types
 
-TOKEN = os.getenv("TOKEN")  # Берём TOKEN из настроек Render
+# Telegram bot token from environment (Render env var)
+TOKEN = os.getenv("TOKEN")
+if not TOKEN:
+    raise RuntimeError("TOKEN env var is required")
+
+# Webhook configuration: prefer Render external URL, fallback to explicit WEBHOOK_URL
+WEBHOOK_PATH = f"/webhook/{TOKEN}"
+WEBHOOK_BASE = os.getenv("WEBHOOK_URL") or os.getenv("RENDER_EXTERNAL_URL")
+if not WEBHOOK_BASE:
+    raise RuntimeError("WEBHOOK_URL or RENDER_EXTERNAL_URL env var is required")
+WEBHOOK_URL = f"{WEBHOOK_BASE}{WEBHOOK_PATH}"
 
 bot = TeleBot(TOKEN)
-@bot.message_handler(commands=['start'])
-def start(message):
-    bot.send_message(message.chat.id, 'Привет')
+app = Flask(__name__)
 
-@bot.message_handler(content_types='text')
-def get_text_messages(message):
-     bot.send_message(message.from_user.id, message.text)
+
+@bot.message_handler(commands=["start"])
+def start(message):
+    bot.send_message(message.chat.id, "Privet! Otprav mne soobshchenie.")
+
+
+@bot.message_handler(content_types=["text"])
+def echo_text(message):
+    bot.send_message(message.chat.id, message.text)
+
+
+@app.route("/", methods=["GET"])
+def health():
+    return "OK", 200
+
+
+@app.route(WEBHOOK_PATH, methods=["POST"])
+def webhook():
+    if request.headers.get("content-type") != "application/json":
+        abort(403)
+    json_str = request.get_data(as_text=True)
+    update = types.Update.de_json(json_str)
+    bot.process_new_updates([update])
+    return "ok", 200
+
+
+def setup_webhook():
+    bot.remove_webhook()
+    bot.set_webhook(url=WEBHOOK_URL)
+
 
 if __name__ == "__main__":
-    bot.infinity_polling()
+    setup_webhook()
+    port = int(os.getenv("PORT", "5000"))
+    app.run(host="0.0.0.0", port=port)
