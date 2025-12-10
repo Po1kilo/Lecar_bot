@@ -25,6 +25,7 @@ def start(message):
 
 @bot.message_handler(content_types=["text"])
 def echo_text(message):
+    bot.send_message(message.chat.id, "Тут появится ваш статус заказа когда коллеги допилят нужный эндпоинт")
     bot.send_message(message.chat.id, message.text)
 
 
