@@ -18,13 +18,22 @@ bot = TeleBot(TOKEN)
 app = Flask(__name__)
 
 
-@bot.message_handler(commands=["start"])
+@bot.message_handler(commands=["start", "help"])
 def start(message):
-    bot.send_message(message.chat.id, "Privet! Otprav mne soobshchenie.")
+    text = (
+        "Привет! 👋\n\n"
+        "Я бот для проверки статуса заказа.\n"
+        "Просто отправь мне *номер заказа*, а я верну его текущий статус.\n\n"
+        "Сейчас я работаю в тестовом режиме — как только коллеги доделают эндпоинт, "
+        "здесь появится живой статус из системы."
+    )
+    bot.send_message(message.chat.id, text, parse_mode="Markdown")
+
 
 
 @bot.message_handler(content_types=["text"])
 def echo_text(message):
+    bot.send_chat_action(message.chat.id, "typing")  # имитация набора
     bot.send_message(message.chat.id, "Тут появится ваш статус заказа когда коллеги допилят нужный эндпоинт")
     bot.send_message(message.chat.id, message.text)
 
