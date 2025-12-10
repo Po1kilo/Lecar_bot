@@ -27,6 +27,19 @@ def start(message):
         "Просто отправь мне *номер заказа*, а я верну его текущий статус.\n\n"
         "Сейчас я работаю в тестовом режиме — как только коллеги доделают эндпоинт, "
         "здесь появится живой статус из системы."
+        )
+
+    keyboard = InlineKeyboardMarkup(row_width=1)
+    keyboard.add(
+        InlineKeyboardButton("📦 Ввести номер заказа", callback_data="enter_order"),
+        InlineKeyboardButton("🌐 Перейти на сайт Lecar.ru", url="https://lecar.ru"),
+    )
+
+    bot.send_message(
+        message.chat.id,
+        text,
+        parse_mode="Markdown",
+        reply_markup=keyboard,
     )
     bot.send_message(message.chat.id, text, parse_mode="Markdown")
 
