@@ -58,6 +58,7 @@ def ask_order_number(call):
 def echo_text(message):
     bot.send_chat_action(message.chat.id, "typing")
     bot.send_message(message.chat.id, message.text)
+    bot.send_message(message.chat.id, "Заказ не найден!")
 
 
 @app.route("/", methods=["GET"])
