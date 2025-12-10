@@ -20,6 +20,7 @@ app = Flask(__name__)
 
 @bot.message_handler(commands=["start", "help"])
 def start(message):
+    bot.send_chat_action(message.chat.id, "typing")  # имитация набора
     text = (
         "Привет! 👋\n\n"
         "Я бот для проверки статуса заказа.\n"
@@ -34,7 +35,6 @@ def start(message):
 @bot.message_handler(content_types=["text"])
 def echo_text(message):
     bot.send_chat_action(message.chat.id, "typing")  # имитация набора
-    bot.send_message(message.chat.id, "Тут появится ваш статус заказа когда коллеги допилят нужный эндпоинт")
     bot.send_message(message.chat.id, message.text)
 
 
