@@ -1,6 +1,8 @@
 import os
 from flask import Flask, abort, request
 from telebot import TeleBot, types
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+
 
 # Telegram bot token from environment (Render env var)
 TOKEN = os.getenv("TOKEN")
@@ -20,19 +22,17 @@ app = Flask(__name__)
 
 @bot.message_handler(commands=["start", "help"])
 def start(message):
-    bot.send_chat_action(message.chat.id, "typing")  # имитация набора
+    bot.send_chat_action(message.chat.id, "typing")
     text = (
-        "Привет! 👋\n\n"
-        "Я бот для проверки статуса заказа.\n"
-        "Просто отправь мне *номер заказа*, а я верну его текущий статус.\n\n"
-        "Сейчас я работаю в тестовом режиме — как только коллеги доделают эндпоинт, "
-        "здесь появится живой статус из системы."
-        )
+        "Привет!\n\n"
+        "Я помогу проверить статус заказа на Lecar.ru.\n"
+        "Нажмите *Ввести номер заказа*, чтобы отправить номер, или откройте сайт."
+    )
 
     keyboard = InlineKeyboardMarkup(row_width=1)
     keyboard.add(
-        InlineKeyboardButton("📦 Ввести номер заказа", callback_data="enter_order"),
-        InlineKeyboardButton("🌐 Перейти на сайт Lecar.ru", url="https://lecar.ru"),
+        InlineKeyboardButton("Ввести номер заказа", callback_data="enter_order"),
+        InlineKeyboardButton("Перейти на Lecar.ru", url="https://lecar.ru"),
     )
 
     bot.send_message(
@@ -41,13 +41,22 @@ def start(message):
         parse_mode="Markdown",
         reply_markup=keyboard,
     )
-    bot.send_message(message.chat.id, text, parse_mode="Markdown")
 
+
+@bot.callback_query_handler(func=lambda call: call.data == "enter_order")
+def ask_order_number(call):
+    bot.answer_callback_query(call.id)
+    bot.send_message(
+        call.message.chat.id,
+        "Пожалуйста, отправьте свой *номер заказа* ответным сообщением.\n\n"
+        "Например: `12345678` или `AB-12345`.",
+        parse_mode="Markdown",
+    )
 
 
 @bot.message_handler(content_types=["text"])
 def echo_text(message):
-    bot.send_chat_action(message.chat.id, "typing")  # имитация набора
+    bot.send_chat_action(message.chat.id, "typing")
     bot.send_message(message.chat.id, message.text)
 
 
