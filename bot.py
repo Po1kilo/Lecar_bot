@@ -61,7 +61,7 @@ def echo_text(message):
     bot.send_message(message.chat.id, "Заказ не найден!")
 
 
-@app.route("/", methods=["GET"])
+@app.route("/", methods=["GET", "HEAD"])
 def health():
     return "OK", 200
 
@@ -85,3 +85,4 @@ if __name__ == "__main__":
     setup_webhook()
     port = int(os.getenv("PORT", "5000"))
     app.run(host="0.0.0.0", port=port)
+
